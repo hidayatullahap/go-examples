@@ -5,4 +5,4 @@ For this example we will create API, DB, and Mock services with same interface. 
  ![alt text](https://i.imgur.com/h5Bk2Q9.jpg "example")
  
  In this illustration we can switch between multiple service implementation. For example we need to test API hit without
- actually hit API, we can use mock implementaion. Code implementation available in package service and service_example_test.go   
+ actually hit the API, we can use mock instead. Code available in package service and service_example_test.go   
