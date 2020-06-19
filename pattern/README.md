@@ -1,1 +1,0 @@
-This example is useful when you need something to do before or after function executed
