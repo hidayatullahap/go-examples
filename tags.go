@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"reflect"
+	"strings"
 )
 
 type DbConfig struct {
@@ -12,31 +14,54 @@ type DbConfig struct {
 }
 
 func main() {
+	_ = os.Setenv("db.name", "prodcts")
+	_ = os.Setenv("db.host", "http://127.0.0.1")
+
 	var foo DbConfig
 
-	value := reflect.ValueOf(&foo)
-	if value.Kind() == reflect.Ptr {
-		value = value.Elem()
+	valueOf := reflect.ValueOf(&foo)
+	if valueOf.Kind() == reflect.Ptr {
+		valueOf = valueOf.Elem()
 
-		v := reflect.TypeOf(&foo)
-		if v.Kind() == reflect.Ptr {
-			v = v.Elem()
+		typeOf := reflect.TypeOf(&foo)
+		if typeOf.Kind() == reflect.Ptr {
+			typeOf = typeOf.Elem()
 		}
 
 		var fieldNames []reflect.StructField
 
-		for i := 0; i < v.NumField(); i++ {
-			fieldNames = append(fieldNames, v.Field(i))
+		for i := 0; i < typeOf.NumField(); i++ {
+			fieldNames = append(fieldNames, typeOf.Field(i))
 		}
 
 		for _, field := range fieldNames {
-			f := value.FieldByName(field.Name)
-			f.SetString("test")
+			f := valueOf.FieldByName(field.Name)
 
 			tag := field.Tag.Get("env")
-			fmt.Println(tag)
+			key := getEnv(tag)
+			f.SetString(key)
 		}
 	}
 
 	fmt.Println(foo)
+}
+
+func getEnv(key string) string {
+	value := ""
+	s := strings.Split(key, ",")
+	sLen := len(s)
+
+	switch {
+	case sLen > 1:
+		if s[1] == "required" {
+			value = os.Getenv(s[0])
+			if value == "" {
+				panic(fmt.Sprintf("env config key %s not set", s[0]))
+			}
+		}
+	case sLen == 1:
+		value = os.Getenv(s[0])
+	}
+
+	return value
 }
